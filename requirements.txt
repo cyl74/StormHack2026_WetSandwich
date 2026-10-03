@@ -1,0 +1,2 @@
+# Firestore + Cloud Storage (used by firebase_store.py)
+firebase-admin>=6.5
