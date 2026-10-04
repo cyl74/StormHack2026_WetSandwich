@@ -29,7 +29,7 @@ except ModuleNotFoundError:  # pragma: no cover - demo mode fallback
     firestore = None
     FieldFilter = None
 
-from src.character_sim import Character, Stats, clamp, valid_traits
+from char_sim import Character, Stats, clamp, valid_traits
 
 try:
     from PIL import Image
