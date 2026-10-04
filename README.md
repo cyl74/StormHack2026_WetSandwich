@@ -10,4 +10,4 @@ python -m http.server 8000
 
 cd Code/src
 source venv/bin/activate
-python game_view.py --cred secrets/serviceAccountKey.json
+python viewGame.py --cred secrets/serviceAccountKey.json
