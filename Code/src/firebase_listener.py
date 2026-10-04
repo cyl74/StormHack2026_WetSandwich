@@ -34,21 +34,35 @@ from char_sim import EMOTIONS, TRAITS, Character, Stats, clamp, valid_traits
 # --------------------------------------------------------------------------- #
 # Step 3: the AI (mocked)
 # --------------------------------------------------------------------------- #
-def run_ai(image_bytes: bytes | None) -> dict:
-    """MOCK. Returns the same shape your extract_traits() returns.
+def random_traits(rng: random.Random | None = None) -> dict:
+    """Backup for the AI: 5 random traits, plus random stats so characters differ."""
+    r = rng or random
+    return {
+        "emotion": r.choice(sorted(EMOTIONS)),
+        "size": r.choice([0.5, 1.0, 1.5, 2.0]),
+        "passivity": r.random(),
+        "laziness": r.random(),
+        "base": Stats(speed=r.randint(1, 10), damage=r.randint(1, 10),
+                      health=r.randint(20, 100)),
+        "traits": r.sample(list(TRAITS), min(5, len(TRAITS))),
+    }
 
-    To use the real thing later, replace the body with something like:
+
+def ai_traits(image_bytes: bytes | None) -> dict:
+    """Real AI goes here, returning the same shape as random_traits().
+    Not wired up yet, so it raises and run_ai falls back to random_traits().
+
         analysis = analyze_image_from_bytes(image_bytes)   # Gemini
         return extract_traits(analysis)
     """
-    return {
-        "emotion": "happiness",
-        "size": 1.0,
-        "passivity": 0.5,
-        "laziness": 0.3,
-        "base": Stats(speed=6, damage=6, health=60),
-        "traits": ["cautious"],
-    }
+    raise NotImplementedError("AI not connected yet")
+
+
+def run_ai(image_bytes: bytes | None) -> dict:
+    try:
+        return ai_traits(image_bytes)
+    except Exception:                                  # AI missing or failed: use the backup
+        return random_traits()
 
 
 # --------------------------------------------------------------------------- #
@@ -179,12 +193,7 @@ class DemoPipeline:
         r = self.rng
         while not self._stop_evt.is_set():
             self._n += 1
-            t = run_ai(None)
-            t.update(emotion=r.choice(sorted(EMOTIONS)), size=r.uniform(0.6, 1.6),
-                     passivity=r.random(), laziness=r.random(),
-                     base=Stats(speed=r.randint(1, 10), damage=r.randint(1, 10),
-                                health=r.randint(20, 100)),
-                     traits=r.sample(list(TRAITS), r.randint(1, 4)))
+            t = random_traits(r)
             self.meta[f"demo{self._n}"] = {"name": f"Demo{self._n}", "title": "Doodle"}
             self.incoming.put((build_character(f"demo{self._n}", t), None))
             self.received += 1
