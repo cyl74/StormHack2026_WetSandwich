@@ -1,2 +1,11 @@
 # Firestore + Cloud Storage (used by firebase_store.py)
 firebase-admin>=6.5
+
+#Pygame
+pygame>=2.5
+
+#firebase
+firebase-admin>=6.5
+
+#idk, trust claude
+pillow>=10.0
