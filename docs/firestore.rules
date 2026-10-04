@@ -1,0 +1,25 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // The website may only CREATE spawn docs, and only well-formed ones.
+    // The Python game uses firebase-admin, which bypasses these rules.
+    match /spawns/{spawnId} {
+      allow create: if
+        request.resource.data.keys().hasOnly(['name', 'title', 'emotion', 'size', 'image', 'status', 'createdAt']) &&
+        request.resource.data.keys().hasAll(['name', 'title', 'emotion', 'size', 'image', 'status', 'createdAt']) &&
+        request.resource.data.name is string &&
+        request.resource.data.name.size() > 0 && request.resource.data.name.size() <= 20 &&
+        request.resource.data.title is string &&
+        request.resource.data.title.size() > 0 && request.resource.data.title.size() <= 20 &&
+        request.resource.data.emotion in ['happiness', 'sadness', 'fear', 'anger', 'anxiety'] &&
+        request.resource.data.size in [0.5, 1, 1.5, 2] &&
+        request.resource.data.image is string &&
+        request.resource.data.image.size() <= 70000 &&      // ~50 KB PNG as base64
+        request.resource.data.status == 'pending' &&
+        request.resource.data.createdAt == request.time;
+
+      allow read, update, delete: if false;
+    }
+  }
+}
