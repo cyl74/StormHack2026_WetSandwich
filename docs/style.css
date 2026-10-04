@@ -107,3 +107,80 @@ textarea { resize: none; flex: 1; min-height: 140px; }
 .player { aspect-ratio: 16 / 9; width: 100%; display: flex; align-items: center; justify-content: center; }
 .player iframe { width: 100%; height: 100%; border: 0; display: block; }
 .player .error { margin: 24px; }
+
+.draw-box {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 8px;
+  flex: 0 0 auto;
+  width: fit-content;
+  height: auto;
+  min-height: 0;
+  aspect-ratio: auto;
+  align-self: flex-start;
+}
+
+#draw-canvas {
+  display: block;
+  width: 288px;                 /* 3x the 96px canvas */
+  height: 288px;
+  max-width: 100%;
+  image-rendering: pixelated;
+  touch-action: none;
+  cursor: crosshair;
+  border-radius: 8px;
+  background: repeating-conic-gradient(#eee 0% 25%, #fff 0% 50%) 50% / 20px 20px;
+}
+
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+  width: 288px;
+  max-width: 100%;
+}
+
+/* Tool buttons: inherit your page's font and text color */
+.draw-box .tool {
+  font: inherit;
+  font-size: 0.9rem;
+  color: inherit;
+  padding: 4px 10px;
+  border: 2px solid currentColor;
+  border-radius: 8px;
+  background: #f59919;
+  cursor: pointer;
+  flex: 1 0 auto;
+  box-shadow: none;
+  transition: background 0.1s, transform 0.05s;
+}
+.draw-box .tool:hover { background: rgba(0, 0, 0, 0.08); }
+.draw-box .tool:active { transform: translateY(1px); }
+
+/* Selected tool (Pen/Eraser) */
+.draw-box .tool.primary {
+  background: currentColor;
+}
+.draw-box .tool.primary {
+  color: inherit;
+}
+.draw-box .tool.primary {
+  background: #ffd54a;          /* highlight color: change to match your theme */
+  color: #222;
+}
+
+.toolbar input[type="color"] {
+  width: 36px;
+  height: 32px;
+  padding: 0;
+  border: 2px solid currentColor;
+  border-radius: 8px;
+  background: none;
+  cursor: pointer;
+}
+.toolbar input[type="range"] {
+  flex: 1 1 80px;
+  accent-color: currentColor;
+}

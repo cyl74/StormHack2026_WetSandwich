@@ -1,4 +1,5 @@
 import { firebaseConfig } from "./config.js";
+import { initDrawing } from "./draw.js";
 
 const FIREBASE_VERSION = "10.12.2";
 const IMG_SIZE = 96;               // final image is IMG_SIZE x IMG_SIZE PNG
@@ -24,69 +25,8 @@ const ready = (async () => {
   db = fs.getFirestore(initializeApp(firebaseConfig));
 })();
 
-// ---------- Image input ----------
-let imageBase64 = null;            // PNG base64, without the "data:image/png;base64," prefix
-
-function handleFile(file) {
-  if (!file || !file.type.startsWith("image/")) {
-    showError("That doesn't look like an image.");
-    return;
-  }
-  const url = URL.createObjectURL(file);
-  const img = new Image();
-  img.onload = () => { URL.revokeObjectURL(url); setImage(img); };
-  img.onerror = () => { URL.revokeObjectURL(url); showError("Couldn't read that image."); };
-  img.src = url;
-}
-
-// Shrink to IMG_SIZE x IMG_SIZE, keeping the whole image (padded with transparency).
-function setImage(img) {
-  const canvas = document.createElement("canvas");
-  canvas.width = canvas.height = IMG_SIZE;
-  const ctx = canvas.getContext("2d");
-  ctx.imageSmoothingQuality = "high";
-  const scale = Math.min(IMG_SIZE / img.naturalWidth, IMG_SIZE / img.naturalHeight);
-  const w = img.naturalWidth * scale;
-  const h = img.naturalHeight * scale;
-  ctx.drawImage(img, (IMG_SIZE - w) / 2, (IMG_SIZE - h) / 2, w, h);
-
-  const dataUrl = canvas.toDataURL("image/png");
-  imageBase64 = dataUrl.split(",")[1];
-
-  $("preview").src = dataUrl;
-  $("preview").hidden = false;
-  $("drop-text").hidden = true;
-  hideError();
-}
-
-const dropZone = $("drop-zone");
-const fileInput = $("file-input");
-
-dropZone.addEventListener("click", () => fileInput.click());
-dropZone.addEventListener("keydown", (e) => {
-  if (e.key === "Enter" || e.key === " ") { e.preventDefault(); fileInput.click(); }
-});
-fileInput.addEventListener("change", () => {
-  handleFile(fileInput.files[0]);
-  fileInput.value = "";
-});
-
-dropZone.addEventListener("dragover", (e) => { e.preventDefault(); dropZone.classList.add("dragging"); });
-dropZone.addEventListener("dragleave", () => dropZone.classList.remove("dragging"));
-dropZone.addEventListener("drop", (e) => {
-  e.preventDefault();
-  dropZone.classList.remove("dragging");
-  handleFile(e.dataTransfer.files[0]);
-});
-
-// Paste anywhere on the page (unless typing in a text field)
-document.addEventListener("paste", (e) => {
-  if ($("create-view").hidden) return;
-  const item = [...(e.clipboardData?.items || [])].find((i) => i.type.startsWith("image/"));
-  if (!item) return;
-  e.preventDefault();
-  handleFile(item.getAsFile());
-});
+// ---------- Drawing ----------
+const drawing = initDrawing();
 
 // ---------- Live "Name the Title" hint ----------
 function updateHint() {
@@ -107,7 +47,7 @@ function collect() {
     title: $("title").value.trim(),
     emotion: $("emotion").value,
     size: Number($("size").value),
-    image: imageBase64,
+    image: drawing.isEmpty() ? null : drawing.toBase64(IMG_SIZE),
     status: "pending",
   };
   // Background story ($("story")) is intentionally never read or sent.
@@ -116,9 +56,9 @@ function collect() {
   if (!data.title) return [null, "Give your character a title."];
   if (!EMOTIONS.includes(data.emotion)) return [null, "Pick an emotion."];
   if (!SIZES.includes(data.size)) return [null, "Pick a size."];
-  if (!data.image) return [null, "Add an image of your character."];
+  if (!data.image) return [null, "Draw your character first."];
   return [data, null];
-}
+  };
 
 const withTimeout = (p, ms) =>
   Promise.race([p, new Promise((_, rej) => setTimeout(() => rej(new Error("Timed out. Check your connection.")), ms))]);
@@ -172,10 +112,7 @@ function showCreated(data) {
 
 $("again-btn").addEventListener("click", () => {
   $("create-form").reset();
-  imageBase64 = null;
-  $("preview").hidden = true;
-  $("preview").removeAttribute("src");
-  $("drop-text").hidden = false;
+  drawing.clear();
   updateHint();
   hideError();
   $("created-view").hidden = true;

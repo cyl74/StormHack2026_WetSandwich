@@ -8,7 +8,7 @@ export const TWITCH_CHANNEL = "wetsandwiches03102026";
 // writing to Firestore, so you can test the page before Firebase is set up.
 // This config is not secret; it is meant to live in the page.
 export const firebaseConfig = {
-  apiKey: "AIzaSyAKgGYWKKidaG8le8AdbP4qGVTget-ZFPg",
+  apiKey: "AIzaSyAKgGYWKKidaG8le8AdbP4qGVTget-ZFPg", // Key is public
   authDomain: "wet-sandwich-d7ba3.firebaseapp.com",
   projectId: "wet-sandwich-d7ba3",
   storageBucket: "wet-sandwich-d7ba3.firebasestorage.app",
