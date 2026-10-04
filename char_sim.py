@@ -22,17 +22,19 @@ from dataclasses import dataclass, field
 # --------------------------------------------------------------------------- #
 # Config
 # --------------------------------------------------------------------------- #
-WORLD_W, WORLD_H = 2000.0, 2000.0
+WORLD_W, WORLD_H = 4000.0, 2000.0
 MAX_CHARACTERS = 1000
 MAX_TRAITS = 5
-HP_DECAY_PER_SEC = 0.1          # 1 damage per 10 sec
-BASE_SPEED_UNITS = 40.0         # world units/sec at speed stat 5 (x1.0)
+HP_DECAY_PER_SEC = 0.5          # 5 damage per 10 sec
+SPEED_MULT = 10.0                # global knob: how much faster everyone moves
+DAMAGE_MULT = 20.0               # global knob: how much harder every hit lands
+BASE_SPEED_UNITS = 40.0 * SPEED_MULT   # world units/sec at speed stat 5 (x1.0)
 BASE_RADIUS = 8.0
 BASE_PERSONAL_SPACE = 40.0
 MAX_PERSONAL_SPACE = 60.0
 MAX_SENSE_RADIUS = 100.0        # also the spatial-hash cell size
 LIMP_HP_FRACTION = 0.30
-STAT_CAPS = {"speed": 3, "damage": 3, "health": 20}   # max total trait modifier (+/-)
+STAT_CAPS = {"speed": 999, "damage": 999, "health": 999}   # max total trait modifier (+/-) NO CAP
 EMOTIONS = {"happiness", "sadness", "fear", "anger", "anxiety"}
 
 
@@ -462,7 +464,7 @@ class World:
             # attack the nearest character in reach (happy characters never attack)
             reach = p.radius + nearest.params.radius + 4
             if d0 <= reach and p.attack_prob > 0 and rng.random() < p.attack_prob * dt:
-                dmg = ch.stats.damage
+                dmg = ch.stats.damage * DAMAGE_MULT
                 pending[nearest.id] = pending.get(nearest.id, 0.0) + dmg
                 self.events.append(("attack", ch.id, nearest.id, dmg))
 
