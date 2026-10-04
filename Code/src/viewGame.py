@@ -37,7 +37,8 @@ DT = 1.0 / TICK_HZ
 SPRITE_UNITS = 40.0          # sprite height in world units at scale 1.0
 MAX_SPAWNS_PER_FRAME = 25    # decode budget so a big batch doesn't freeze the window
 
-BG = (24, 26, 33)
+# BG = (24, 26, 33)
+BG = (245, 242, 235)
 GRID = (36, 39, 48)
 EMOTION_COLORS = {
     "happiness": (255, 205, 60),
@@ -230,7 +231,8 @@ def draw_hud(screen, font, small, world, feeder, clock, speed, paused, counts, s
     lines = [
         f"alive {len(world.chars)}   queued {feeder.pending}   sim {world.time:5.0f}s   "
         f"speed {speed}x{'  PAUSED' if paused else ''}   {clock.get_fps():3.0f} fps",
-        f"attacks {counts['attack']}   deaths {counts['dead']}   old age {counts['old_age']}",
+        f"attacks {counts['attack']}   deaths {counts['dead']}",
+        # f"attacks {counts['attack']}   deaths {counts['dead']}   old age {counts['old_age']}",
         f"{feeder.label}   received {feeder.received}",
     ]
     if feeder.last_error:
