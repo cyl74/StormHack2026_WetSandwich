@@ -1,6 +1,6 @@
 from __future__ import annotations
 from typing import Dict, Any
-from src.character_sim import SpawnQueue, Stats
+from StormHack2026_WetSandwich.Code.src.char_sim import SpawnQueue, Stats
 
 
 def enqueue_character(queue: SpawnQueue, image_path: str, data: Dict[str, Any]) -> int:

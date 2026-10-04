@@ -4,7 +4,7 @@ import argparse
 import json
 from pathlib import Path
 
-from src.character_sim import World, SpawnQueue
+from StormHack2026_WetSandwich.Code.src.char_sim import World, SpawnQueue
 from src.doodle_ai.gemini_analyzer import analyze_image
 from src.doodle_ai.spawn_adapter import enqueue_character
 from src.doodle_ai.trait_extractor import extract_traits

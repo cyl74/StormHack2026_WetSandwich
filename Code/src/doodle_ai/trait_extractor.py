@@ -1,7 +1,7 @@
 from __future__ import annotations
 import json
 from typing import Dict, Any, List
-from src.character_sim import Stats, valid_traits
+from StormHack2026_WetSandwich.Code.src.char_sim import Stats, valid_traits
 
 
 def extract_traits(analysis: Dict[str, Any]) -> Dict[str, Any]:
