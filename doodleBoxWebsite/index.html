@@ -30,14 +30,16 @@
       </div>
 
       <div class="row">
-        <div id="drop-zone" class="box image-box" tabindex="0" role="button"
-             aria-label="Add character image: paste, drop, or click to choose">
-          <img id="preview" alt="Character preview" hidden>
-          <div id="drop-text" class="drop-text">
-            <strong>Put your character here!</strong>
-            <span>Paste (Ctrl/Cmd+V), drop a PNG, or click to choose</span>
+        <div class="box image-box draw-box">
+          <canvas id="draw-canvas" width="384" height="384" aria-label="Draw your character"></canvas>
+          <div class="toolbar">
+            <input id="pen-color" type="color" value="#222222" title="Color">
+            <input id="pen-size" type="range" min="4" max="60" value="16" title="Brush size">
+            <button type="button" id="tool-pen" class="btn tool active">Pen</button>
+            <button type="button" id="tool-eraser" class="btn tool">Eraser</button>
+            <button type="button" id="undo-btn" class="btn tool">Undo</button>
+            <button type="button" id="clear-btn" class="btn tool">Clear</button>
           </div>
-          <input id="file-input" type="file" accept="image/*" hidden>
         </div>
 
         <div class="col">
