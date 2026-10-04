@@ -1,7 +1,11 @@
 from __future__ import annotations
-import json
-from typing import Dict, Any, List
-from StormHack2026_WetSandwich.Code.src.char_sim import Stats, valid_traits
+
+from typing import Any, Dict
+
+try:
+    from src.char_sim import Stats, valid_traits
+except ImportError:  # pragma: no cover
+    from char_sim import Stats, valid_traits
 
 
 def extract_traits(analysis: Dict[str, Any]) -> Dict[str, Any]:

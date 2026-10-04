@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Doodle Arena</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="topbar">
+    <h1>Doodle Arena</h1>
+    <span id="mode-badge" class="badge" hidden title="No Firebase config yet: nothing is sent">Dry run</span>
+  </header>
+
+  <!-- ===== Create view ===== -->
+  <main id="create-view">
+    <form id="create-form" novalidate>
+      <div class="row">
+        <label class="box field">
+          <span class="label">Name</span>
+          <input id="name" type="text" maxlength="20" placeholder="Bob" autocomplete="off" required>
+        </label>
+        <label class="box field">
+          <span class="label">Title</span>
+          <input id="title" type="text" maxlength="20" placeholder="Builder" autocomplete="off" required>
+          <span class="hint" id="fullname-hint">Bob the Builder</span>
+        </label>
+      </div>
+
+      <div class="row">
+        <div class="box image-box draw-box">
+          <canvas id="draw-canvas" width="384" height="384" aria-label="Draw your character"></canvas>
+          <div class="toolbar">
+            <input id="pen-color" type="color" value="#222222" title="Color">
+            <input id="pen-size" type="range" min="4" max="60" value="16" title="Brush size">
+            <button type="button" id="tool-pen" class="btn tool active">Pen</button>
+            <button type="button" id="tool-eraser" class="btn tool">Eraser</button>
+            <button type="button" id="undo-btn" class="btn tool">Undo</button>
+            <button type="button" id="clear-btn" class="btn tool">Clear</button>
+          </div>
+        </div>
+
+        <div class="col">
+          <div class="row">
+            <label class="box field">
+              <span class="label">Emotion</span>
+              <select id="emotion" required>
+                <option value="" selected disabled>Choose…</option>
+                <option value="happiness">Happiness</option>
+                <option value="sadness">Sadness</option>
+                <option value="fear">Fear</option>
+                <option value="anger">Anger</option>
+                <option value="anxiety">Anxiety</option>
+              </select>
+            </label>
+            <label class="box field">
+              <span class="label">Size</span>
+              <select id="size" required>
+                <option value="0.5">0.5</option>
+                <option value="1" selected>1.0</option>
+                <option value="1.5">1.5</option>
+                <option value="2">2.0</option>
+              </select>
+            </label>
+          </div>
+          <label class="box field grow">
+            <span class="label">Background story</span>
+            <!-- Intentionally never read or sent anywhere. -->
+            <textarea id="story" maxlength="1000" placeholder="Bob was born in a hardware store…"></textarea>
+          </label>
+        </div>
+      </div>
+
+      <p id="error" class="error" role="alert" hidden></p>
+      <button id="create-btn" class="btn primary" type="submit">Create character</button>
+    </form>
+  </main>
+
+  <!-- ===== Created view ===== -->
+  <main id="created-view" hidden>
+    <div class="box fullname"><span id="c-fullname"></span></div>
+    <div class="row">
+      <div class="box image-box result">
+        <img id="c-image" alt="Your character">
+      </div>
+      <div class="box stats">
+        <p class="created-msg">Character created! It will appear in the arena shortly.</p>
+        <dl>
+          <dt>Emotion</dt><dd id="c-emotion"></dd>
+          <dt>Size</dt><dd id="c-size"></dd>
+        </dl>
+        <h3>AI JSON</h3>
+        <pre id="c-analysis" class="ai-json"></pre>
+      </div>
+    </div>
+    <div class="actions">
+      <a class="btn primary" href="stream.html" target="_blank" rel="noopener">View Twitch Stream</a>
+      <button id="again-btn" class="btn" type="button">Create another</button>
+    </div>
+  </main>
+
+  <script type="module" src="app.js"></script>
+</body>
+</html>
