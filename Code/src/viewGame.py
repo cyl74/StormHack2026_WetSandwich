@@ -343,6 +343,10 @@ def main() -> None:
                 break
             if world.spawn(ch):
                 bank.add(ch.id, data, ch.emotion)
+                print(
+                    f"[GAME] spawned {ch.id}: emotion={ch.emotion}, size={ch.size:.2f}, "
+                    f"traits={ch.traits}, meta={feeder.meta.get(ch.id)}"
+                )
 
         # fixed-step simulation
         if not paused:

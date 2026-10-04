@@ -22,11 +22,18 @@ from __future__ import annotations
 
 import argparse
 import base64
+import json
 import queue
 import random
+import sys
 import threading
 import time
 from concurrent.futures import ThreadPoolExecutor
+from pathlib import Path
+
+SRC_DIR = Path(__file__).resolve().parent
+if str(SRC_DIR) not in sys.path:
+    sys.path.insert(0, str(SRC_DIR))
 
 from char_sim import EMOTIONS, TRAITS, Character, Stats, clamp, valid_traits
 
@@ -48,20 +55,47 @@ def random_traits(rng: random.Random | None = None) -> dict:
     }
 
 
-def ai_traits(image_bytes: bytes | None) -> dict:
-    """Real AI goes here, returning the same shape as random_traits().
-    Not wired up yet, so it raises and run_ai falls back to random_traits().
+def _load_ai_helpers():
+    try:
+        from src.doodle_ai.gemini_analyzer import analyze_image_from_bytes
+        from src.doodle_ai.trait_extractor import extract_traits
+        return analyze_image_from_bytes, extract_traits
+    except ImportError:
+        import sys
+        from pathlib import Path
 
-        analysis = analyze_image_from_bytes(image_bytes)   # Gemini
-        return extract_traits(analysis)
-    """
-    raise NotImplementedError("AI not connected yet")
+        repo_root = Path(__file__).resolve().parents[2]
+        if str(repo_root) not in sys.path:
+            sys.path.insert(0, str(repo_root))
+        from src.doodle_ai.gemini_analyzer import analyze_image_from_bytes
+        from src.doodle_ai.trait_extractor import extract_traits
+        return analyze_image_from_bytes, extract_traits
+
+
+def ai_traits(image_bytes: bytes | None) -> dict:
+    """Use Gemini to analyze the uploaded doodle and convert it to character traits."""
+    if not image_bytes:
+        return random_traits()
+
+    analyze_image_from_bytes, extract_traits = _load_ai_helpers()
+    analysis = analyze_image_from_bytes(image_bytes, mime_type="image/png")
+    print("[AI] raw analysis JSON:")
+    print(json.dumps(analysis, indent=2, sort_keys=True))
+    traits = extract_traits(analysis)
+    print(
+        "[AI] extracted traits: "
+        f"emotion={traits['emotion']}, size={traits['size']}, "
+        f"passivity={traits['passivity']}, laziness={traits['laziness']}, "
+        f"traits={traits['traits']}"
+    )
+    return traits
 
 
 def run_ai(image_bytes: bytes | None) -> dict:
     try:
         return ai_traits(image_bytes)
-    except Exception:                                  # AI missing or failed: use the backup
+    except Exception as exc:                                  # AI missing or failed: use the backup
+        print(f"[AI] fallback to demo traits because AI failed: {exc}")
         return random_traits()
 
 
@@ -135,13 +169,19 @@ class SpawnPipeline:
     def _process(self, doc_id: str, data: dict) -> None:
         try:
             raw = base64.b64decode(data["image"])      # FE sends bare base64 PNG
-            traits = run_ai(raw)                       # 3. AI (mock)
+            print(f"[AI] received new drawing {doc_id} ({len(raw)} bytes)")
+            traits = run_ai(raw)                        # 3. AI => returns a dict with JSON + traits
             if data.get("emotion") in EMOTIONS:        # the player's own picks win
                 traits["emotion"] = data["emotion"]
             try:
                 traits["size"] = float(data["size"])
             except (KeyError, TypeError, ValueError):
                 pass
+            print(
+                f"[AI] final spawn payload for {doc_id}: "
+                f"emotion={traits['emotion']}, size={traits['size']}, "
+                f"traits={traits['traits']}"
+            )
             character = build_character(doc_id, traits)  # 4. char_sim
             image = self._clean_image(raw)
             self.meta[doc_id] = {"name": str(data.get("name", "?"))[:40],
@@ -155,6 +195,7 @@ class SpawnPipeline:
                 self.received += 1
         except Exception as e:
             self.last_error = f"{doc_id}: {e!r}"
+            print(f"[AI] processing failed for {doc_id}: {e!r}")
         finally:
             with self._lock:
                 self._in_flight -= 1
