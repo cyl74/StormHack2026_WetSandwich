@@ -93,8 +93,8 @@ class FirestoreSpawnQueue:
         self._cache_size = image_cache_size
 
     # -- write path (called when the frontend POSTs a new drawing) ----------- #
-    def enqueue(self, *, image_bytes: bytes, emotion: str, size: float, base: Stats,
-                traits, passivity: float = 0.5, laziness: float = 0.3) -> str:
+    def enqueue(self, *, image_bytes: bytes, emotion: str, size: float, base: Stats,  traits,
+                name: str = "", passivity: float = 0.5, laziness: float = 0.3) -> str:
         data, content_type = prepare_image(image_bytes)   # raises ValueError if bad
 
         queue_ref = self.queue.document()                 # auto-generated id
@@ -108,6 +108,7 @@ class FirestoreSpawnQueue:
             "created_at": firestore.SERVER_TIMESTAMP,
         })
         batch.set(queue_ref, {
+            "name": name,
             "emotion": emotion,
             "size": clamp(size, 0.5, 2.0),
             "passivity": clamp(passivity, 0, 1),
